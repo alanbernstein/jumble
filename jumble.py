@@ -9,7 +9,7 @@ import requests
 import xml.etree.ElementTree as ET
 
 
-class JumbleAPI(object):
+class JumbleClient(object):
     base_url = 'https://www.uclick.com/puzzles/tmjmf/puzzles/tmjmf'
     date_format = '%y%m%d'
     cachefile_base = os.getenv('CACHE', os.path.expanduser('~/.cache')) + '/jumble/'
@@ -132,6 +132,6 @@ def interactive(jumble):
 
 
 if __name__ == '__main__':
-    ja = JumbleAPI()
-    jumble = ja.get_jumble()
+    jc = JumbleClient()
+    jumble = jc.get_jumble()
     interactive(jumble)
