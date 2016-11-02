@@ -51,9 +51,9 @@ class JumbleClient(object):
         filename = '%s%s.xml' % (self.cachefile_base, dt.strftime(date, self.date_format))
         if os.path.isfile(filename):
             with open(filename, 'r') as f:
-                data = f.read()
+                xml = f.read()
             print('read jumble cache (%s)' % filename)
-            return data
+            return xml
         else:
             xml = self.get_jumble_from_server(date)
             with open(filename, 'w') as f:
