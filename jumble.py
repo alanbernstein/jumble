@@ -19,6 +19,7 @@ class JumbleClient(object):
             os.makedirs(self.cachefile_base)
 
     def get_jumble(self, date=None):
+        """public interface"""
         if not date:
             date = dt.today()
 
@@ -69,6 +70,8 @@ class JumbleClient(object):
 
 
 def print_jumble(jumble, solved_flags):
+
+    # print the clues, while accumulating circled letters from the solved ones
     letters = ''
     print('')
     for clue, solved in zip(jumble['clues'], solved_flags):
@@ -82,13 +85,36 @@ def print_jumble(jumble, solved_flags):
             print(''.join(['_o'[n+1 in clue['circles']] for n in range(L)]))
         print('')
 
+    # print the caption, plus all available circled letters
     print(jumble['caption'] + '...')
     print(letters.upper())
 
-    s1 = re.sub('[A-Z]', '_', jumble['layout'])
-    s2 = re.sub('[{}]', '', s1)
-    print(s2)
+    # print the solution layout
+    print(get_layout_display(jumble['layout']))
     print('')
+
+
+def get_layout_display(layout):
+    """
+    needs to be parsed:
+    'OUT{ TO }PASTURE' -> solution = OUTPASTURE, display = "___ TO _______"
+    """
+    # too naive:
+    # s1 = re.sub('[A-Z]', '_', layout)
+    # s2 = re.sub('[{}]', '', s1)
+
+    disp = ''
+    state = 0
+    for c in layout:
+        if c == '{':
+            state = 1
+        elif c == '}':
+            state = 0
+        elif state == 0 and c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+            disp += '_'
+        else:
+            disp += c
+    return disp
 
 
 def print_letters(jumble, solved_flags):
