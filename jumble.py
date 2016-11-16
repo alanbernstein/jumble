@@ -4,6 +4,7 @@ the source used by http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-html
 """
 import os
 import re
+import random
 from datetime import datetime as dt
 import requests
 import xml.etree.ElementTree as ET
@@ -59,6 +60,11 @@ class JumbleClient(object):
             xml = self.get_jumble_from_server(date)
             with open(filename, 'w') as f:
                 f.write(xml)
+            linkname = '%slatest.xml' % self.cachefile_base
+            os.unlink(linkname)
+            print('unlink %s' % linkname)
+            os.symlink(filename, linkname)
+            print('link %s' % filename)
             print('wrote to cache (%s)' % filename)
             return xml
 
@@ -87,7 +93,9 @@ def print_jumble(jumble, solved_flags):
 
     # print the caption, plus all available circled letters
     print(jumble['caption'] + '...')
-    print(letters.upper())
+    l = list(letters.upper())
+    random.shuffle(l)
+    print(''.join(l))
 
     # print the solution layout
     print(get_layout_display(jumble['layout']))
@@ -98,6 +106,7 @@ def get_layout_display(layout):
     """
     needs to be parsed:
     'OUT{ TO }PASTURE' -> solution = OUTPASTURE, display = "___ TO _______"
+    just use state machine to track whether inside parens
     """
     # too naive:
     # s1 = re.sub('[A-Z]', '_', layout)
@@ -124,7 +133,9 @@ def print_letters(jumble, solved_flags):
             for n in clue['circles']:
                 letters += clue['answer'][n-1]
 
-    print(letters.upper())
+    l = list(letters.upper())
+    random.shuffle(l)
+    print(''.join(l))
 
 
 def interactive(jumble):
@@ -143,6 +154,7 @@ def interactive(jumble):
             solved[answers.index(inp)] = True
             t.append(dt.now())
 
+        # print(inp, answer_words) # for debugging
         if any([w in answer_words for w in inp.split()]):
             print('"%s" is in solution ' % inp)
             # TODO: store this and show it/remove the used letters
@@ -160,4 +172,5 @@ def interactive(jumble):
 if __name__ == '__main__':
     jc = JumbleClient()
     jumble = jc.get_jumble()
+    print('http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-htmlstory.html')
     interactive(jumble)
