@@ -6,7 +6,7 @@ import os
 import re
 import random
 from datetime import datetime as dt
-import requests
+import urllib2
 import xml.etree.ElementTree as ET
 
 
@@ -71,8 +71,8 @@ class JumbleClient(object):
     def get_jumble_from_server(self, date):
         url = '%s%s-data.xml' % (self.base_url, dt.strftime(date, self.date_format))
         print('getting jumble from server (%s)' % url)
-        resp = requests.get(url)
-        return resp.content
+        resp = urllib2.urlopen(url)
+        return resp.read()
 
 
 def print_jumble(jumble, solved_flags):
