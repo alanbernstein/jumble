@@ -5,6 +5,11 @@ web
 - simple "responsive" page works on mobile
 
 
+todo:
+- interactive
+- view previous days
+
+
 cli
 ===
 
