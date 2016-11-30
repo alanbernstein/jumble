@@ -66,6 +66,8 @@ class JumbleClient(object):
             gif = self.get_jumble_from_server(date, 'gif')
             with open(xml_filename, 'w') as f:
                 f.write(xml)
+            with open(gif_filename, 'wb') as fi:
+                fi.write(gif)
             linkname = '%slatest.xml' % self.cachefile_base
             os.unlink(linkname)
             print('unlink %s' % linkname)
@@ -83,10 +85,10 @@ class JumbleClient(object):
 
 
 def print_jumble(jumble, solved_flags):
-
     # print the clues, while accumulating circled letters from the solved ones
     letters = ''
     print('')
+    print(jumble['local_image'])
     for clue, solved in zip(jumble['clues'], solved_flags):
         print(clue['jumbled'])
         if solved:
@@ -118,7 +120,6 @@ def get_layout_display(layout):
     # too naive:
     # s1 = re.sub('[A-Z]', '_', layout)
     # s2 = re.sub('[{}]', '', s1)
-
     disp = ''
     state = 0
     for c in layout:
