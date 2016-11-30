@@ -1,3 +1,13 @@
+web
+===
+- python script retrieves+caches data on daily cron
+- same script serves data as cleaned up json
+- simple "responsive" page works on mobile
+
+
+cli
+===
+
 just run `python jumble.py`
 
 stores data in ~/.cache/jumble
