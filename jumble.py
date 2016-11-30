@@ -26,6 +26,7 @@ class JumbleClient(object):
 
         jumble_xml = self.get_jumble_from_server_or_cache(date)
         jumble_json = self.parse_jumble_xml(jumble_xml)
+        jumble_json['local_image'] = self.get_local_filename(date, 'gif')
         return jumble_json
 
     def parse_jumble_xml(self, xml_string):
@@ -49,27 +50,33 @@ class JumbleClient(object):
             'circles': [int(n) for n in xml_clue.attrib['circle'].split(',')],
         }
 
+    def get_local_filename(self, date, ext):
+        return '%s%s.%s' % (self.cachefile_base, dt.strftime(date, self.date_format), ext)
+
     def get_jumble_from_server_or_cache(self, date):
-        filename = '%s%s.xml' % (self.cachefile_base, dt.strftime(date, self.date_format))
-        if os.path.isfile(filename):
-            with open(filename, 'r') as f:
+        xml_filename = self.get_local_filename(date, 'xml')
+        gif_filename = self.get_local_filename(date, 'gif')
+        if os.path.isfile(xml_filename):
+            with open(xml_filename, 'r') as f:
                 xml = f.read()
-            print('read jumble cache (%s)' % filename)
+            print('read jumble cache (%s)' % xml_filename)
             return xml
         else:
             xml = self.get_jumble_from_server(date)
-            with open(filename, 'w') as f:
+            gif = self.get_jumble_from_server(date, 'gif')
+            with open(xml_filename, 'w') as f:
                 f.write(xml)
             linkname = '%slatest.xml' % self.cachefile_base
             os.unlink(linkname)
             print('unlink %s' % linkname)
-            os.symlink(filename, linkname)
-            print('link %s' % filename)
-            print('wrote to cache (%s)' % filename)
+            os.symlink(xml_filename, linkname)
+            print('link %s' % xml_filename)
+            print('wrote to cache (%s)' % xml_filename)
             return xml
 
-    def get_jumble_from_server(self, date):
-        url = '%s%s-data.xml' % (self.base_url, dt.strftime(date, self.date_format))
+    def get_jumble_from_server(self, date, ext='xml'):
+        suffix = '-data' if ext == 'xml' else ''
+        url = '%s%s%s.%s' % (self.base_url, dt.strftime(date, self.date_format), suffix, ext)
         print('getting jumble from server (%s)' % url)
         resp = urllib2.urlopen(url)
         return resp.read()
