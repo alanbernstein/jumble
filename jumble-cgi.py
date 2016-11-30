@@ -1,5 +1,5 @@
 #!/usr/bin/python
-"""test of retrieving daily jumble data from uclick,
+"""backend for jumble app, handle retrieving and caching to file
 the source used by http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-htmlstory.html
 """
 from datetime import datetime as dt
@@ -25,8 +25,10 @@ def main():
     # url = env['REQUEST_URI']
     # params = urlparse.parse_qs(urlparse.urlparse(url).query)
 
-    # TODO: allow requesting old stuff
-    # TODO: factor out common stuff
+    # TODO: allow requesting old data, either with date string or day-delta
+    #       jumble.py?date=161127
+    #       jumble.py?prev=1
+    # TODO: move common to separate file
 
     jc = JumbleClient()
     jumble = jc.get_jumble()
