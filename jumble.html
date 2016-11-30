@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript">
+      // TODO
+      // - simple interface:
+      //   - click/tap jumbled list to put them into the next spot on the solved list
+      //   - gray out jumbled when tapped
+      //   - x next to each clue to reset
+      //   - populate list for final answer as well
+      // - handle drag and drop?
+      // - handle keyboard input?
+      // x get data
+      // x populate divs
+      // x fit whole thing to width
+      // http://alanbernstein.net/cgi-bin/jumble.py
+
+      function render_circles(count, circles) {
+        result = ''
+        for(i=1; i<count+1; i++) {
+          if(jQuery.inArray(i, circles) >= 0) {
+            result += 'o'; // '&#3664;' // circle
+          } else {
+            result += '_'; // '&#9633;' // square
+          }
+        }
+        return result
+      }
+
+      $(document).ready(function(){
+        $("#raw").load("http://alanbernstein.net/cgi-bin/jumble.py", function(resp){
+          data = jQuery.parseJSON(resp)
+          $("#1").html(data["clues"][0]["jumbled"])
+          $("#2").html(data["clues"][1]["jumbled"])
+          $("#3").html(data["clues"][2]["jumbled"])
+          $("#4").html(data["clues"][3]["jumbled"])
+          $("#a1").html(render_circles(5, data["clues"][0]["circles"]))
+          $("#a2").html(render_circles(5, data["clues"][1]["circles"]))
+          $("#a3").html(render_circles(6, data["clues"][2]["circles"]))
+          $("#a4").html(render_circles(6, data["clues"][3]["circles"]))
+          $("#caption").html(data["caption"])
+          $("#solution").html(data["layout"])
+          $("#image").attr("src", data["local_image"])
+        });
+   
+      });
+
+
+    </script>
+    <style type="text/css">
+      #raw {
+      display: none;
+      }
+
+      .content {
+      font-size:5vw;
+      font-family: courier;
+      width=80%;
+      margin-left: 10%;
+      }
+
+      #caption {
+      font-size: 3vw;
+      }
+
+      #image {
+      float: right;
+      width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <img id="image" alt="loading..."/>
+
+      <div id="clue">
+        <span id="1"></span>
+        <div id="a1">_____</div>
+      </div>
+      <br />
+
+      <div id="clue">
+        <span id="2"></span>
+        <div id="a2">_____</div>
+      </div>
+      <br />
+
+      <div id="clue">
+        <span id="3"></span>
+        <div id="a3">______</div>
+      </div>
+      <br />
+
+      <div id="clue">
+        <span id="4"></span>
+        <div id="a4">______</div>
+      </div>
+      <br />
+
+      <div id="caption"></div>
+      <div id="solution"></div>
+      <div id="raw"></div>
+    </div>
+  </body>
+</html>
