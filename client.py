@@ -8,6 +8,7 @@ class JumbleClient(object):
     """
     handles retrieving, caching, and formatting jumble data from source server
     default implementation is for local use
+    data found via http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-htmlstory.html
     """
     base_url = 'https://www.uclick.com/puzzles/tmjmf/puzzles/tmjmf'
     date_format = '%y%m%d'

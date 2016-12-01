@@ -1,6 +1,5 @@
 #!/usr/local/bin/python
-"""test of retrieving daily jumble data from uclick,
-the source used by http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-htmlstory.html
+"""interactive CLI jumble app
 """
 import re
 import random
