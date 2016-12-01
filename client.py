@@ -24,7 +24,7 @@ class JumbleClient(object):
 
         jumble_xml = self.get_jumble_from_server_or_cache(date)
         jumble_json = self.parse_jumble_xml(jumble_xml)
-        jumble_json['local_image'] = self.get_image_filename(date)
+        jumble_json['image'] = self.get_image_filename(date)
         return jumble_json
 
     def get_image_filename(self, date):

@@ -20,7 +20,7 @@ def print_jumble(jumble, solved_flags):
     # print the clues, while accumulating circled letters from the solved ones
     letters = ''
     print('')
-    print(jumble['local_image'])
+    print(jumble['image'])
     for clue, solved in zip(jumble['clues'], solved_flags):
         print(clue['jumbled'])
         if solved:
