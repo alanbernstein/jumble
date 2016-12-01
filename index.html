@@ -28,7 +28,7 @@
       }
 
       $(document).ready(function(){
-        $("#raw").load("http://alanbernstein.net/cgi-bin/jumble.py", function(resp){
+        $("#raw").load("https://alanbernstein.net/cgi-bin/jumble.py", function(resp){
           data = jQuery.parseJSON(resp)
           $("#1").html(data["clues"][0]["jumbled"])
           $("#2").html(data["clues"][1]["jumbled"])
