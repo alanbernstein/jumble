@@ -5,7 +5,7 @@ the source used by http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-html
 import json
 import cgitb
 
-from client import JumbleClient
+from client import WebClient
 
 cgitb.enable(format='text')
 print("Content-Type: text/plain;charset=utf-8")
@@ -26,7 +26,7 @@ def main():
     #       jumble.py?date=161127
     #       jumble.py?prev=1
 
-    jc = JumbleClient()
+    jc = WebClient()
     jumble = jc.get_jumble()
     print(json.dumps(jumble))
 

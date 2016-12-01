@@ -1,21 +1,23 @@
+#!/usr/bin/python
+"""test of retrieving daily jumble data from uclick,
+the source used by http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-htmlstory.html
+"""
+from datetime import datetime as dt
+import xml.etree.ElementTree as ET
 import os
 import urllib2
-import xml.etree.ElementTree as ET
-from datetime import datetime as dt
 
 
 class JumbleClient(object):
-    """
-    handles retrieving, caching, and formatting jumble data from source server
-    default implementation is for local use
-    """
     base_url = 'https://www.uclick.com/puzzles/tmjmf/puzzles/tmjmf'
     date_format = '%y%m%d'
-    cachefile_base = os.getenv('CACHE', os.path.expanduser('~/.cache')) + '/jumble/'
+    local_base = '/home/alanb0/public_html'
+    web_base = 'http://alanbernstein.net'
+    cachefile_base = 'data/jumble'
 
     def __init__(self):
-        if not os.path.isdir(self.cachefile_base):
-            os.makedirs(self.cachefile_base)
+        if not os.path.isdir(self.local_base + '/' + self.cachefile_base):
+            os.makedirs(self.local_base + '/' + self.cachefile_base)
 
     def get_jumble(self, date=None):
         """public interface"""
@@ -24,11 +26,8 @@ class JumbleClient(object):
 
         jumble_xml = self.get_jumble_from_server_or_cache(date)
         jumble_json = self.parse_jumble_xml(jumble_xml)
-        jumble_json['local_image'] = self.get_image_filename(date)
+        jumble_json['local_image'] = self.get_web_filename(date, 'gif')
         return jumble_json
-
-    def get_image_filename(self, date):
-        return self.get_local_filename(date, 'gif')
 
     def parse_jumble_xml(self, xml_string):
         if 'xml' not in xml_string:
@@ -56,8 +55,11 @@ class JumbleClient(object):
             'circles': [int(n) for n in xml_clue.attrib['circle'].split(',')],
         }
 
+    def get_web_filename(self, date, ext):
+        return '%s/%s/%s.%s' % (self.web_base, self.cachefile_base, dt.strftime(date, self.date_format), ext)
+
     def get_local_filename(self, date, ext):
-        return '%s%s.%s' % (self.cachefile_base, dt.strftime(date, self.date_format), ext)
+        return '%s/%s/%s.%s' % (self.local_base, self.cachefile_base, dt.strftime(date, self.date_format), ext)
 
     def get_jumble_from_server_or_cache(self, date):
         xml_filename = self.get_local_filename(date, 'xml')
@@ -76,7 +78,7 @@ class JumbleClient(object):
             with open(gif_filename, 'wb') as f:
                 f.write(gif)
 
-            linkname = '%slatest.xml' % self.cachefile_base
+            linkname = '%s/%s/latest.xml' % (self.local_base, self.cachefile_base)
             try:
                 os.unlink(linkname)
                 # print('unlink %s' % linkname)
@@ -96,32 +98,6 @@ class JumbleClient(object):
         # print('getting jumble from server (%s)' % url)
         resp = urllib2.urlopen(url)
         return resp.read()
-
-
-class WebClient(JumbleClient):
-    """
-    minimal extension of client, to deal with path issues of being a web app
-    """
-    local_base = '/home/alanb0/public_html'
-    web_base = 'http://alanbernstein.net'
-    cachefile_base = 'data/jumble'
-
-    def __init__(self):
-        # override to deal with cache path
-        if not os.path.isdir(self.local_base + '/' + self.cachefile_base):
-            os.makedirs(self.local_base + '/' + self.cachefile_base)
-
-    def get_image_filename(self, date):
-        # override: image filename must be remote, not local
-        return self.get_web_filename(date, 'gif')
-
-    def get_web_filename(self, date, ext):
-        # helper for get_image_filename
-        return '%s/%s/%s.%s' % (self.web_base, self.cachefile_base, dt.strftime(date, self.date_format), ext)
-
-    def get_local_filename(self, date, ext):
-        # override to deal with cache path
-        return '%s/%s/%s.%s' % (self.local_base, self.cachefile_base, dt.strftime(date, self.date_format), ext)
 
 
 def format_layout(layout):
