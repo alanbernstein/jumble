@@ -27,6 +27,44 @@
         return result
       }
 
+
+$.ajax({
+  type: 'GET',
+  url: 'https://alanbernstein.net/cgi-bin/jumble.py',
+  contentType: 'text/plain',
+  xhrFields: {
+    withCredentials: false
+  },
+  headers: {
+  },
+
+  success: function() {
+    // Here's where you handle a successful response.
+          data = jQuery.parseJSON(resp)
+          $("#1").html(data["clues"][0]["jumbled"])
+          $("#2").html(data["clues"][1]["jumbled"])
+          $("#3").html(data["clues"][2]["jumbled"])
+          $("#4").html(data["clues"][3]["jumbled"])
+          $("#a1").html(render_circles(5, data["clues"][0]["circles"]))
+          $("#a2").html(render_circles(5, data["clues"][1]["circles"]))
+          $("#a3").html(render_circles(6, data["clues"][2]["circles"]))
+          $("#a4").html(render_circles(6, data["clues"][3]["circles"]))
+          $("#caption").html(data["caption"])
+          $("#solution").html(data["layout"])
+          $("#image").attr("src", data["local_image"])
+
+        },
+
+  error: function() {
+    // Here's where you handle an error response.
+    // Note that if the error was due to a CORS issue,
+    // this function will still fire, but there won't be any additional
+    // information about the error.
+  }
+});
+
+
+        /*
       $(document).ready(function(){
         $("#raw").load("https://alanbernstein.net/cgi-bin/jumble.py", function(resp){
           data = jQuery.parseJSON(resp)
@@ -44,7 +82,7 @@
         });
    
       });
-
+        */
 
     </script>
     <style type="text/css">
