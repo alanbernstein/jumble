@@ -3,69 +3,180 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript">
       // TODO
-      // - simple interface:
-      //   - click/tap jumbled list to put them into the next spot on the solved list
-      //   - gray out jumbled when tapped
-      //   - x next to each clue to reset
-      //   - populate list for final answer as well
-      // - handle drag and drop?
+      // - populate final jumbled elements
+      // - shuffle button for final
+      // - remove single guessed letters?
+      // - handle arbitrary clue sizes and counts
       // - handle keyboard input?
-      // x get data
-      // x populate divs
-      // x fit whole thing to width
-      // http://alanbernstein.net/cgi-bin/jumble.py
 
-      function render_circles(count, circles) {
-        result = ''
-        for(i=1; i<count+1; i++) {
-          if(jQuery.inArray(i, circles) >= 0) {
-            result += 'o'; // '&#3664;' // circle
-          } else {
-            result += '_'; // '&#9633;' // square
-          }
+      function add_circles(clue, locations) {
+        for(n=0; n<locations.length; n++) {
+          id = "g" + clue + (locations[n]-1)
+          $("#" + id).addClass("circled")
+          console.log("add circle to " + id)
         }
-        return result
       }
 
+      function handle_jumbled_click(ev) {
+        // when jX clicked:
+        // - add to final clue
+        var id = ev.toElement.id
+        var el = $("#" + id)
+        var clue = id[1]
+        if(!el.hasClass("used")) {  // if already used, return
+          el.addClass("used")  // add "used" style
+          var slot = next_open_guess_slot(clue)
+          var guess_id = "g" + clue + slot
+          $("#" + guess_id).html(el.text())  // add to next open guess slot
+          if(check_solution(clue)) {
+            $("#c" + clue).addClass("solved")  // add 'solved' style
+          }
+          console.log("try " + id  + "->" + guess_id)
+        }
+      }
+
+      function next_open_guess_slot(clue) {
+        for(n=0; n<num_letters(clue); n++) {
+          id = "g" + clue + n
+          el = $("#" + id)
+          //console.log(n, id, el.text())
+          if(el.text() == "_") {
+            return n
+          }
+        }
+        return 5
+      }
+
+      function num_letters(clue) {
+        // TODO: make this better
+        return [5, 5, 6, 6][clue]
+      }
+
+      function check_solution(clue) {
+        guess = ""
+        for(n=0; n<num_letters(clue); n++) {
+          el = $("#g" + clue + n)
+          guess += el.text()
+        }
+        return guess == $("#a" + clue).html()
+      }
+
+      function handle_guess_click(ev) {
+        // allow clicking guess letter to return it to jumbled list
+        // requires matching letters somehow
+      }
+
+      function handle_x_click(ev) {
+        // - remove from final clue
+        var id = ev.toElement.id
+        var el = $("#" + id)
+        var clue = id[1]
+        for(n=0; n<num_letters(clue); n++) {
+          $("#j" + clue + n).removeClass("used")  // remove 'used' style
+          $("#g" + clue + n).html("_")  // remove from guess slot
+        }
+        $("#c" + clue).removeClass("solved")  // remove 'solved' style
+        console.log("clear clue ", clue)
+      }
+
+      function handle_image_click() {
+        $("#image").toggleClass("invert")
+      }
+
+/*
+{"answer": "SIGNSOFLIFE",
+ "layout": "_____ __ ____",
+ "image": "http://alanbernstein.net/data/jumble/161210.gif",
+ "layout_original": "SIGNS{ }OF{ }LIFE",
+ "caption": "When the aliens landed on the highway, they saw",
+ "clues": [
+   {"answer": "BRING", "circles": [3, 5], "jumbled": "RIGBN"},
+   {"answer": "LOGIC", "circles": [1, 2, 4], "jumbled": "GOCLI"},
+   {"answer": "SUFFIX", "circles": [1, 3, 4], "jumbled": "FUXSIF"},
+   {"answer": "GENIUS", "circles": [2, 3, 6], "jumbled": "SENUGI"}],
+ "date": "161210"}
+
+*/
       $(document).ready(function(){
         $("#raw").load("http://alanbernstein.net/cgi-bin/jumble/backend.py", function(resp){
           data = jQuery.parseJSON(resp)
-          $("#1").html(data["clues"][0]["jumbled"])
-          $("#2").html(data["clues"][1]["jumbled"])
-          $("#3").html(data["clues"][2]["jumbled"])
-          $("#4").html(data["clues"][3]["jumbled"])
-          $("#a1").html(render_circles(5, data["clues"][0]["circles"]))
-          $("#a2").html(render_circles(5, data["clues"][1]["circles"]))
-          $("#a3").html(render_circles(6, data["clues"][2]["circles"]))
-          $("#a4").html(render_circles(6, data["clues"][3]["circles"]))
+
+          for(clue=0; clue<4; clue++) {
+            for(letter=0; letter<num_letters(clue); letter++) {
+              // populate jumbled letter elements
+              $("#j" + clue + letter).html(data["clues"][clue]["jumbled"][letter]).click(handle_jumbled_click)
+            }
+            $("#a" + clue).html(data["clues"][clue]["answer"])
+            $("#x" + clue).click(handle_x_click)
+            add_circles(clue, data["clues"][clue]["circles"])
+          }
+
+          $("#image").click(handle_image_click)
+          // deprecated
           $("#caption").html(data["caption"])
           $("#solution").html(data["layout"])
           $("#image").attr("src", data["image"])
         });
-   
       });
-
 
     </script>
     <style type="text/css">
+      body {
+        color: white;
+        background-color: black;
+      }
+
       #raw {
-      display: none;
+        display: none;
+      }
+
+      .answer {
+        display: none;
       }
 
       .content {
-      font-size:5vw;
-      font-family: courier;
-      width=80%;
-      margin-left: 10%;
+        font-size:5vw;
+        font-family: courier;
+        width=80%;
+        margin-left: 10%;
+      }
+
+      .used {
+        color: #333;
+      }
+
+      .solved {
+        color: #0f0;
+      }
+
+      .circled {
+        border: 2px solid #666;
+        border-radius: 50%;
+      }
+
+      .jumbled {
+        margin: .5vw;
+      }
+
+      .guess {
+        margin: .5vw;
+      }
+
+      .x {
+        font-family: arial;
       }
 
       #caption {
-      font-size: 3vw;
+        font-size: 3vw;
+      }
+
+      .invert {
+        filter: invert(1);
       }
 
       #image {
-      float: right;
-      width: 50%;
+        float: right;
+        width: 50%;
       }
     </style>
   </head>
@@ -73,30 +184,67 @@
     <div class="content">
       <img id="image" alt="loading..."/>
 
-      <div id="clue">
-        <span id="1"></span>
-        <div id="a1">_____</div>
+      <div class="clue" id="c0">
+        <span class="jumbled-container">
+          <span class="jumbled" id="j00"></span><span class="jumbled" id="j01"></span><span class="jumbled" id="j02"></span><span class="jumbled" id="j03"></span><span class="jumbled" id="j04"></span>
+        </span><br />
+        <span class="guess-container">
+          <span class="guess" id="g00">_</span><span class="guess" id="g01">_</span><span class="guess" id="g02">_</span><span class="guess" id="g03">_</span><span class="guess" id="g04">_</span>
+        </span>
+        <span class="answer" id="a0"></span>
+        <span class="x" id="x0">×</span>
       </div>
       <br />
 
-      <div id="clue">
-        <span id="2"></span>
-        <div id="a2">_____</div>
+      <div class="clue" id="c1">
+        <span class="jumbled-container">
+          <span class="jumbled" id="j10"></span><span class="jumbled" id="j11"></span><span class="jumbled" id="j12"></span><span class="jumbled" id="j13"></span><span class="jumbled" id="j14"></span>
+        </span><br />
+        <span class="guess-container">
+          <span class="guess" id="g10">_</span><span class="guess" id="g11">_</span><span class="guess" id="g12">_</span><span class="guess" id="g13">_</span><span class="guess" id="g14">_</span>
+        </span>
+        <span class="answer" id="a1"></span>
+        <span class="x" id="x1">×</span>
       </div>
       <br />
 
-      <div id="clue">
-        <span id="3"></span>
-        <div id="a3">______</div>
+      <div class="clue" id="c2">
+        <span class="jumbled-container">
+          <span class="jumbled" id="j20"></span><span class="jumbled" id="j21"></span><span class="jumbled" id="j22"></span><span class="jumbled" id="j23"></span><span class="jumbled" id="j24"></span><span class="jumbled" id="j25"></span>
+        </span><br />
+        <span class="guess-container">
+          <span class="guess" id="g20">_</span><span class="guess" id="g21">_</span><span class="guess" id="g22">_</span><span class="guess" id="g23">_</span><span class="guess" id="g24">_</span><span class="guess" id="g25">_</span>
+        </span>
+        <span class="answer" id="a2"></span>
+        <span class="x" id="x2">×</span>
       </div>
       <br />
 
-      <div id="clue">
-        <span id="4"></span>
-        <div id="a4">______</div>
+      <div class="clue" id="c3">
+        <span class="jumbled-container">
+          <span class="jumbled" id="j30"></span><span class="jumbled" id="j31"></span><span class="jumbled" id="j32"></span><span class="jumbled" id="j33"></span><span class="jumbled" id="j34"></span><span class="jumbled" id="j35"></span>
+        </span><br />
+        <span class="guess-container">
+          <span class="guess" id="g30">_</span><span class="guess" id="g31">_</span><span class="guess" id="g32">_</span><span class="guess" id="g33">_</span><span class="guess" id="g34">_</span><span class="guess" id="g35">_</span>
+        </span>
+        <span class="answer" id="a3"></span>
+        <span class="x" id="x3">×</span>
       </div>
       <br />
 
+      <div class="final">
+        <div id="caption"></div>
+        <span class="jumbled-container">
+          asdf
+        </span><br />
+        <span class="guess-container">
+          qwer
+        </span>
+        <span class="answer" id="af"></span>
+        <span class="x" id="xf">×</span>
+      </div>
+
+      <!-- deprecated -->
       <div id="caption"></div>
       <div id="solution"></div>
       <div id="raw"></div>
