@@ -2,11 +2,10 @@ web
 ===
 - python script retrieves+caches data on daily cron
 - same script serves data as cleaned up json
-- simple "responsive" page works on mobile
+- both interactive, and simple "responsive" page, work on mobile
 
 
 todo:
-- interactive
 - view previous days
 
 
