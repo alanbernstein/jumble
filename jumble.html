@@ -7,6 +7,9 @@
       // - remove single guessed letters?
       // - handle arbitrary clue sizes and counts
       // - handle keyboard input?
+      // - drag and drop?
+
+      var num_letters = [5, 5, 6, 6]
 
       function add_circles(clue, locations) {
         // runs at load
@@ -33,6 +36,7 @@
             $("#final-guess").append(layout[n])
           }
         }
+        num_letters.push(idx)
       }
 
       function handle_jumbled_click(ev) {
@@ -51,30 +55,52 @@
             $("#c" + clue).addClass("solved")  // add 'solved' style
           }
           if(guess_el.hasClass("circled")) {
-            add_final_guess(letter, clue)
+            add_final_guess(letter, clue)  // add to final jumbled list
           }
           console.log("try " + id  + "->" + guess_id + " (" + letter + ")")
+          if(el.parent()[0].id == "final-jumbled") { // if parent has id final-guess
+            source_class = "f" + get_source_clue(el)
+            //guess_el.removeClass()
+            //guess_el.addClass("guess")
+            guess_el.addClass(source_class)
+            console.log("final click: ")
+          }
         }
+      }
+
+      function get_source_clue(el) {
+        classes = el.attr("class").split(" ")
+        source_class = classes.filter(function(s){return s[0] == "f"})
+        source_clue = source_class[0][1]
+        console.log("get_source_clue", classes, source_class, source_clue)
+        return source_clue
       }
 
       function add_final_guess(letter, clue) {
         // add a circled letter to the list of final jumbled letters
-        idx = 0  // don't seem to need an index, or really even an id
-        var span = $("<span>", {class: "jumbled " + clue, id: "j4"}).html(letter)
-        // span.click(handle_jumbled_click)  // not ready yet
+        // idx = 0  // don't seem to need an index, or really even an id
+        idx = $("#final-jumbled > .jumbled").length
+        console.log("add_final_guess", letter, clue, idx)
+        var span = $("<span>", {class: "jumbled f" + clue, id: "j4" + idx}).html(letter)
+        span.click(handle_jumbled_click)  // not ready yet
         $("#final-jumbled").append(span)
       }
 
+      function remove_final_jumbled_from_clue(clue) {
+        // remove letters from final jumbled list, if they came from a specific clue
+        $(".jumbled.f" + clue).remove()
+      }
+
       function remove_final_guesses_from_clue(clue) {
-        // remove letters from the final jumble list, and final guess list,
-        // if they came from a specific clue
-        $(".jumbled." + clue).remove()
-        $(".guess." + clue).remove()
+        // remove letters from the final guess list, if they came from a specific clue
+        $(".guess.f" + clue).removeClass("f" + clue).html("_")
+        console.log("remove final guesses", clue, ".jumbled."+clue, ".guess."+clue)
       }
 
       function next_open_guess_slot(clue) {
         // determine the next place a guessed letter should go
-        for(n=0; n<num_letters(clue); n++) {
+        annotate(arguments)
+        for(n=0; n<num_letters[clue]; n++) {
           id = "g" + clue + n
           el = $("#" + id)
           console.log(n, id, el.text())
@@ -85,15 +111,14 @@
         return 5
       }
 
-      function num_letters(clue) {
-        // TODO: make this better
-        return [5, 5, 6, 6][clue]
+      function annotate(args) {
+        console.log(args.callee.name, args)
       }
 
       function check_solution(clue) {
         // check if the guess for a clue matches the solution
         guess = ""
-        for(n=0; n<num_letters(clue); n++) {
+        for(n=0; n<num_letters[clue]; n++) {
           el = $("#g" + clue + n)
           guess += el.text()
         }
@@ -111,12 +136,13 @@
         var id = ev.toElement.id
         var el = $("#" + id)
         var clue = id[1]
-        for(n=0; n<num_letters(clue); n++) {
+        for(n=0; n<num_letters[clue]; n++) {
           $("#j" + clue + n).removeClass("used")  // remove 'used' style
           $("#g" + clue + n).html("_")  // remove from guess slot
         }
         $("#c" + clue).removeClass("solved")  // remove 'solved' style
         remove_final_guesses_from_clue(clue)
+        remove_final_jumbled_from_clue(clue)
         console.log("clear clue ", clue)
       }
 
@@ -124,6 +150,13 @@
         // runs when the final x is clicked
         var id = ev.toElement.id
         var el = $("#" + id)
+        var clue = 4
+        console.log("final x", el, clue)
+        for(n=0; n<num_letters[clue]; n++) {
+          $("#j" + clue + n).removeClass("used")
+          $("#g" + clue + n).html("_")
+          //console.log("j" + clue + n + " - remove 'used'")
+        }
       }
 
       function handle_image_click() {
@@ -135,7 +168,7 @@
           data = jQuery.parseJSON(resp)
 
           for(clue=0; clue<4; clue++) {
-            for(letter=0; letter<num_letters(clue); letter++) {
+            for(letter=0; letter<num_letters[clue]; letter++) {
               // populate jumbled letter elements
               $("#j" + clue + letter).html(data["clues"][clue]["jumbled"][letter]).click(handle_jumbled_click)
             }
@@ -145,6 +178,7 @@
           }
 
           populate_final_guess(data["layout"])
+          $("#xf").click(handle_final_x_click)
           $("#caption").html(data["caption"])
           $("#image").attr("src", data["image"]).click(handle_image_click)
         });
