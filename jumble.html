@@ -3,13 +3,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript">
       // TODO
-      // - populate final jumbled elements
       // - shuffle button for final
       // - remove single guessed letters?
       // - handle arbitrary clue sizes and counts
       // - handle keyboard input?
 
       function add_circles(clue, locations) {
+        // runs at load
+        // adds circle styling to the appropriate guess slots
         for(n=0; n<locations.length; n++) {
           id = "g" + clue + (locations[n]-1)
           $("#" + id).addClass("circled")
@@ -18,8 +19,7 @@
       }
 
       function handle_jumbled_click(ev) {
-        // when jX clicked:
-        // - add to final clue
+        // runs when one of the jumbled clue letters is clicked
         var id = ev.toElement.id
         var el = $("#" + id)
         var clue = id[1]
@@ -36,6 +36,7 @@
       }
 
       function next_open_guess_slot(clue) {
+        // determine the next place a guessed letter should go
         for(n=0; n<num_letters(clue); n++) {
           id = "g" + clue + n
           el = $("#" + id)
@@ -53,6 +54,7 @@
       }
 
       function check_solution(clue) {
+        // check if the guess for a clue matches the solution
         guess = ""
         for(n=0; n<num_letters(clue); n++) {
           el = $("#g" + clue + n)
@@ -62,12 +64,13 @@
       }
 
       function handle_guess_click(ev) {
+        // runs when a guessed letter is clicked
         // allow clicking guess letter to return it to jumbled list
-        // requires matching letters somehow
+        // requires being able to remove an exact letter from the final
       }
 
       function handle_x_click(ev) {
-        // - remove from final clue
+        // runs when an x for a clue is clicked
         var id = ev.toElement.id
         var el = $("#" + id)
         var clue = id[1]
@@ -76,27 +79,20 @@
           $("#g" + clue + n).html("_")  // remove from guess slot
         }
         $("#c" + clue).removeClass("solved")  // remove 'solved' style
+        remove_final_guesses_from_clue(clue)
         console.log("clear clue ", clue)
+      }
+
+      function handle_final_x_click(ev) {
+        // runs when the final x is clicked
+        var id = ev.toElement.id
+        var el = $("#" + id)
       }
 
       function handle_image_click() {
         $("#image").toggleClass("invert")
       }
 
-/*
-{"answer": "SIGNSOFLIFE",
- "layout": "_____ __ ____",
- "image": "http://alanbernstein.net/data/jumble/161210.gif",
- "layout_original": "SIGNS{ }OF{ }LIFE",
- "caption": "When the aliens landed on the highway, they saw",
- "clues": [
-   {"answer": "BRING", "circles": [3, 5], "jumbled": "RIGBN"},
-   {"answer": "LOGIC", "circles": [1, 2, 4], "jumbled": "GOCLI"},
-   {"answer": "SUFFIX", "circles": [1, 3, 4], "jumbled": "FUXSIF"},
-   {"answer": "GENIUS", "circles": [2, 3, 6], "jumbled": "SENUGI"}],
- "date": "161210"}
-
-*/
       $(document).ready(function(){
         $("#raw").load("http://alanbernstein.net/cgi-bin/jumble/backend.py", function(resp){
           data = jQuery.parseJSON(resp)
