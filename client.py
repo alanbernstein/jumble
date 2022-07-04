@@ -103,8 +103,8 @@ class WebClient(JumbleClient):
     """
     minimal extension of client, to deal with path issues of being a web app
     """
-    local_base = '/home/alanb0/public_html'
-    web_base = 'http://alanbernstein.net'
+    local_base = os.getenv('JUMBLE_LOCAL_BASE', '/home/user/')
+    web_base = os.getenv('SITE_URL', 'www.example.com')
     cachefile_base = 'data/jumble'
 
     def __init__(self):
