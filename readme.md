@@ -1,3 +1,5 @@
+This project is deprecated due to the private "API" that I found and reverse-engineered being shut down.
+
 web
 ===
 - python script retrieves+caches data on daily cron
