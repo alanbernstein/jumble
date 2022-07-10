@@ -1,0 +1,15 @@
+<Jumble>
+<Date v="200104"/>
+<clues>
+<c1 j="OWSNO" a="SWOON" circle="2,4,5"/>
+<c2 j="UVNEE" a="VENUE" circle="2,5"/>
+<c3 j="RAYTAS" a="ASTRAY" circle="1,5"/>
+<c4 j="DUROAN" a="AROUND" circle="5,6"/>
+</clues>
+<caption>
+<v1 t="The billboards were so profitable, they decided to"/>
+</caption>
+<solution>
+<s1 layout="{“}AD{” }A{ }NEW{ }ONE" a="ADANEWONE"/>
+</solution>
+</Jumble>

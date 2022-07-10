@@ -1,0 +1,87 @@
+{
+  "date": "07/09/2022",
+  "band": "jumble",
+  "type": "daily",
+  "clues": [
+    {
+      "clueNo": 1,
+      "clueType": "",
+      "word": "CREMY",
+      "answer": "MERCY",
+      "shape": {
+        "type": "circle",
+        "value": "1,2,4"
+      },
+      "text": "",
+      "asset": null
+    },
+    {
+      "clueNo": 2,
+      "clueType": "",
+      "word": "RHAFW",
+      "answer": "WHARF",
+      "shape": {
+        "type": "circle",
+        "value": "1,2"
+      },
+      "text": "",
+      "asset": null
+    },
+    {
+      "clueNo": 3,
+      "clueType": "",
+      "word": "SJUDTA",
+      "answer": "ADJUST",
+      "shape": {
+        "type": "circle",
+        "value": "4,5,6"
+      },
+      "text": "",
+      "asset": null
+    },
+    {
+      "clueNo": 4,
+      "clueType": "",
+      "word": "CONUEP",
+      "answer": "POUNCE",
+      "shape": {
+        "type": "circle",
+        "value": "2,4"
+      },
+      "text": "",
+      "asset": null
+    }
+  ],
+  "bonusPuzzle": {
+    "caption": "Was she an expert seamstress? —",
+    "solutions": [
+      {
+        "bonusNo": 0,
+        "prefix": null,
+        "word": "NOT",
+        "text": null,
+        "suffix": null,
+        "group": 1
+      },
+      {
+        "bonusNo": 0,
+        "prefix": "\"",
+        "word": "SEW",
+        "text": null,
+        "suffix": "\"",
+        "group": 1
+      },
+      {
+        "bonusNo": 0,
+        "prefix": null,
+        "word": "MUCH",
+        "text": null,
+        "suffix": null,
+        "group": 2
+      }
+    ],
+    "puzzleStr": "MECWHUSTON"
+  },
+  "cartoonImg": "1911110f-75d6-4b47-adf0-05c04f7ed414|1.0",
+  "sourceFile": "e2f3e464-7959-420e-af8c-160306d64119|1.0"
+}
