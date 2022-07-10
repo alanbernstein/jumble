@@ -7,6 +7,7 @@ from datetime import datetime as dt
 
 from client import JumbleClient
 
+# TODO: https://stackoverflow.com/questions/31704604/how-can-i-troubleshoot-my-python-cgi-script
 
 def main():
     jc = JumbleClient()
