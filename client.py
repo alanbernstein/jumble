@@ -1,3 +1,4 @@
+import json
 import os
 import urllib2
 import xml.etree.ElementTree as ET
@@ -8,10 +9,37 @@ class JumbleClient(object):
     """
     handles retrieving, caching, and formatting jumble data from source server
     default implementation is for local use
-    data found via http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-htmlstory.html
+    new tca data found via
+    - user site: https://fun.chicagotribune.com/game/tca-jumble-daily
+    - puzzle frame: https://puzzles.tribunecontentagency.com/puzzles/jumble/jumble.do?apiKey=e06317ec9b0e52363f404c73f8b681b926908f6c22dd46f86040e5fea0e96879&css=https://fun.chicagotribune.com/assets/tca/css/embedder.css&lang=en_US&wlp=true&type=jumbledaily&gd_sdk_referrer_url=https://html5.gamedistribution.com/21a66edc2bc84400acddb3d95487cd68/
+
+    old uclick data found via http://www.chicagotribune.com/chi-jumbleclassic-htmlpage-htmlstory.html
     """
-    base_url = 'https://www.uclick.com/puzzles/tmjmf/puzzles/tmjmf'
-    date_format = '%y%m%d'
+
+    #base_url = 'https://www.uclick.com/puzzles/tmjmf/puzzles/tmjmf'
+    #date_format = '%y%m%d'
+
+    base_url = 'https://puzzles.tribunecontentagency.com/puzzles/pzzResource/puzzle.do'
+    data_raw_template = 'apiKey=e06317ec9b0e52363f404c73f8b681b926908f6c22dd46f86040e5fea0e96879&productId=jumbledaily&publicationDate=&prvNxt=&langCode=en-US&ldt=%s'
+    date_format = '%m/%d/%y'  # 07/09/2022
+    headers = {
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Accept-Language': 'en-US,en;q=0.9',
+'Connection': 'keep-alive',
+'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+ 'Cookie': 'JSESSIONID=C4CC6580198345B9695FEB57AC96268E; localeCookie=en_US; _ga=GA1.2.176094494.1657421934; _gid=GA1.2.1150432500.1657421934',
+ 'Origin': 'https://puzzles.tribunecontentagency.com',
+ 'Referer': 'https://puzzles.tribunecontentagency.com/puzzles/jumble/jumble.do?apiKey=e06317ec9b0e52363f404c73f8b681b926908f6c22dd46f86040e5fea0e96879&css=https://fun.chicagotribune.com/assets/tca/css/embedder.css&lang=en_US&wlp=true&type=jumbledaily&gd_sdk_referrer_url=https://html5.gamedistribution.com/21a66edc2bc84400acddb3d95487cd68/',
+ 'Sec-Fetch-Dest': 'empty',
+ 'Sec-Fetch-Mode': 'cors',
+ 'Sec-Fetch-Site': 'same-origin',
+ 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36',
+ 'X-Requested-With': 'XMLHttpRequest',
+ 'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+ 'sec-ch-ua-mobile': '?0',
+ 'sec-ch-ua-platform': '"macOS"',
+    }
+
     cachefile_base = os.getenv('CACHE', os.path.expanduser('~/.cache')) + '/jumble/'
 
     def __init__(self):
@@ -23,19 +51,15 @@ class JumbleClient(object):
         if not date:
             date = dt.today()
 
-        jumble_xml = self.get_jumble_from_server_or_cache(date)
-        jumble_json = self.parse_jumble_xml(jumble_xml)
-        jumble_json['image'] = self.get_image_filename(date)
+        jumble_json = self.get_jumble_from_server_or_cache(date)
+        #jumble_json = self.parse_jumble_xml(jumble_xml)
+        #jumble_json['image'] = self.get_image_filename(date)
         return jumble_json
 
     def get_image_filename(self, date):
         return self.get_local_filename(date, 'gif')
 
     def parse_jumble_xml(self, xml_string):
-        if 'xml' not in xml_string:
-            # not sure why this happens
-            raise Exception('request error')
-
         root = ET.fromstring(xml_string)
         layout_original = root.find('solution')[0].attrib['layout'],
         if type(layout_original) == tuple:
@@ -61,19 +85,19 @@ class JumbleClient(object):
         return '%s%s.%s' % (self.cachefile_base, dt.strftime(date, self.date_format), ext)
 
     def get_jumble_from_server_or_cache(self, date):
-        xml_filename = self.get_local_filename(date, 'xml')
+        details_filename = self.get_local_filename(date, 'json')
         gif_filename = self.get_local_filename(date, 'gif')
 
-        if os.path.isfile(xml_filename):
-            with open(xml_filename, 'r') as f:
-                xml = f.read()
-            # print('read jumble cache (%s)' % xml_filename)
-            return xml
+        if os.path.isfile(details_filename):
+            with open(details_filename, 'r') as f:
+                details = f.read()
+            print('read jumble cache (%s)' % details_filename)
+            return details
         else:
-            xml = self.get_jumble_from_server(date)
+            details = self.get_jumble_from_server(date)
             gif = self.get_jumble_from_server(date, 'gif')
-            with open(xml_filename, 'w') as f:
-                f.write(xml)
+            with open(details_filename, 'w') as f:
+                f.write(details)
             with open(gif_filename, 'wb') as f:
                 f.write(gif)
 
@@ -84,19 +108,26 @@ class JumbleClient(object):
             except:
                 pass
             try:
-                os.symlink(xml_filename, linkname)
+                os.symlink(details_filename, linkname)
                 # print('link %s' % xml_filename)
             except:
                 pass
             # print('wrote to cache (%s)' % xml_filename)
-            return xml
+            return details
 
-    def get_jumble_from_server(self, date, ext='xml'):
+    def get_jumble_from_server_old(self, date, ext='xml'):
         suffix = '-data' if ext == 'xml' else ''
         url = '%s%s%s.%s' % (self.base_url, dt.strftime(date, self.date_format), suffix, ext)
         # print('getting jumble from server (%s)' % url)
         resp = urllib2.urlopen(url)
         return resp.read()
+
+    def get_jumble_from_server(self, date, ext='json'):
+        data = self.data_raw_template % dt.strftime(date, self.date_format)
+        request = urllib2.Request(self.base_url, data=data, headers=self.headers)
+        resp = urllib2.urlopen(request).read()
+        resp_json = json.loads(resp)
+        return resp_json
 
 
 class WebClient(JumbleClient):
